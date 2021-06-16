@@ -1,0 +1,74 @@
+{
+    "variables": {
+        "packer_profile": "packer-ec2-s3",
+        "application_name": "webserver",
+        "application_version": "1.0",
+        "region": "us-east-1",
+        "instance_type": "t2.micro",
+        "source_ami": "ami-0747bdcabd34c712a",
+        "iam_profile": "automation",
+        "ami_aws_account_id": "793531965091"
+    },
+
+    "builders": [
+    {
+        "name": "{{user `application_name`}}",
+        "type": "amazon-ebs",
+        "ssh_username": "ec2-user",
+        "force_deregister":  "true",
+        "force_delete_snapshot": "true",
+        "associate_public_ip_address": "true",
+        "region": "{{user `region`}}",
+        "source_ami": "{{user `source_ami`}}",
+        "instance_type": "{{user `instance_type`}}",
+        "ami_name": "{{user `application_name`}}-{{user `application_version`}}",
+        "iam_instance_profile": "{{user `packer_profile`}}"
+
+    }
+],
+    "provisioners": [
+        {
+            "type": "shell",
+            "inline": [
+                "sudo yum install epel-release -y"
+            ]
+        },
+        {
+            "type": "shell",
+            "inline": [
+                "sudo yum install git -y"
+            ]
+        },
+        {
+            "type": "shell",
+            "inline": [
+                "sudo yum install unzip -y"
+            ]
+        },
+        {
+            "type": "shell",
+            "inline": [
+                "sudo yum install wget -y"
+            ]
+        },
+        {
+            "type": "shell",
+            "inline": [
+                "sudo yum install tree -y"
+            ]
+        },
+        {
+            "type": "shell",
+            "inline": [
+                "sudo yum install ansible -y"
+            ]
+        },
+        {
+            "type": "ansible-local",
+            "playbook_file": "./apache2.yml",
+            "extra_argument": [
+            "-vvvv"
+            ]
+        }
+    ]
+}
